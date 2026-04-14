@@ -1,0 +1,558 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Templates — Folio</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --bg-deep:    #020510;
+      --bg-mid:     #060d1f;
+      --glass-bg:   rgba(255,255,255,0.04);
+      --glass-border: rgba(255,255,255,0.08);
+      --accent:     #3b82f6;
+      --accent-glow: rgba(59,130,246,0.35);
+      --accent-soft: rgba(59,130,246,0.12);
+      --text-primary: #f0f4ff;
+      --text-muted:   rgba(200,210,240,0.55);
+      --text-subtle:  rgba(200,210,240,0.30);
+      --radius-lg:  18px;
+      --radius-pill: 999px;
+    }
+
+    html { scroll-behavior: smooth; }
+
+    body {
+      font-family: 'DM Sans', sans-serif;
+      background: var(--bg-deep);
+      color: var(--text-primary);
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
+
+    .bg-canvas {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background:
+        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(30,64,175,0.30) 0%, transparent 70%),
+        radial-gradient(ellipse 50% 40% at 80% 80%,  rgba(14,165,233,0.10) 0%, transparent 60%),
+        linear-gradient(160deg, #020510 0%, #060d1f 50%, #020a18 100%);
+    }
+
+    .bg-grid {
+      position: fixed; inset: 0; z-index: 0; pointer-events: none;
+      background-image:
+        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
+      background-size: 60px 60px;
+    }
+
+    nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 0 5%; height: 70px;
+      background: rgba(2,5,16,0.75);
+      backdrop-filter: blur(20px);
+      border-bottom: 1px solid var(--glass-border);
+    }
+
+    .nav-logo {
+      font-family: 'Syne', sans-serif;
+      font-size: 1.4rem; font-weight: 800; letter-spacing: -0.5px;
+      color: var(--text-primary); text-decoration: none;
+    }
+    .nav-logo span { color: var(--accent); }
+
+    .nav-links { display: flex; gap: 2rem; list-style: none; }
+    .nav-links a {
+      color: var(--text-muted); text-decoration: none;
+      font-size: 0.875rem; font-weight: 500; transition: color 0.2s;
+    }
+    .nav-links a:hover { color: var(--text-primary); }
+
+    .nav-cta {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius-pill);
+      padding: 0.5rem 1.3rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.875rem; font-weight: 500;
+      cursor: pointer; text-decoration: none;
+      transition: opacity 0.2s, transform 0.2s;
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+    .nav-cta:hover { opacity: 0.88; transform: translateY(-1px); }
+
+    .page-wrap { position: relative; z-index: 1; padding-top: 70px; }
+
+    /* ── Header ── */
+    .page-header {
+      text-align: center;
+      padding: 80px 5% 60px;
+    }
+
+    .page-badge {
+      display: inline-block;
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-pill);
+      padding: 0.35rem 1rem;
+      font-size: 0.72rem; font-weight: 600;
+      letter-spacing: 0.12em; text-transform: uppercase;
+      color: var(--accent); margin-bottom: 1.8rem;
+      backdrop-filter: blur(10px);
+    }
+
+    .page-title {
+      font-family: 'Syne', sans-serif;
+      font-size: clamp(2rem, 5vw, 3.8rem);
+      font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;
+      margin-bottom: 1rem;
+    }
+
+    .page-desc {
+      color: var(--text-muted); font-size: 1rem;
+      line-height: 1.7; max-width: 520px; margin: 0 auto;
+      font-weight: 300;
+    }
+
+    /* ── Filter tabs ── */
+    .filter-tabs {
+      display: flex; justify-content: center; gap: 0.75rem;
+      flex-wrap: wrap; margin: 0 5% 3rem;
+    }
+
+    .filter-tab {
+      background: var(--glass-bg); border: 1px solid var(--glass-border);
+      border-radius: var(--radius-pill); padding: 0.45rem 1.2rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      color: var(--text-muted); cursor: pointer;
+      transition: all 0.2s; backdrop-filter: blur(8px);
+    }
+    .filter-tab.active,
+    .filter-tab:hover {
+      background: var(--accent-soft);
+      border-color: rgba(59,130,246,0.4);
+      color: var(--text-primary);
+    }
+
+    /* ── Templates grid ── */
+    .templates-section {
+      padding: 0 5% 100px;
+      max-width: 1300px; margin: 0 auto;
+    }
+
+    .templates-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+      gap: 2rem;
+    }
+
+    .template-card {
+      background: var(--glass-bg);
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-lg);
+      backdrop-filter: blur(16px);
+      overflow: hidden;
+      transition: transform 0.35s cubic-bezier(.34,1.56,.64,1), border-color 0.3s, box-shadow 0.3s;
+      cursor: pointer;
+      position: relative;
+    }
+
+    .template-card:hover {
+      transform: translateY(-8px);
+      border-color: rgba(59,130,246,0.35);
+      box-shadow: 0 24px 64px rgba(0,0,0,0.5), 0 0 40px rgba(59,130,246,0.10);
+    }
+
+    .template-card.selected-card {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 2px var(--accent), 0 24px 64px rgba(59,130,246,0.2);
+    }
+
+    /* Template preview viewport */
+    .template-preview {
+      height: 260px;
+      padding: 1.5rem;
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* Template A — Minimal */
+    .tpl-a { background: linear-gradient(135deg, rgba(8,12,30,0.9) 0%, rgba(15,23,42,0.95) 100%); }
+    .tpl-a .tpl-header { border-bottom: 1px solid rgba(255,255,255,0.07); padding-bottom: 1rem; margin-bottom: 1rem; }
+    .tpl-a .tpl-name { font-family:'Syne',sans-serif; font-size:1.3rem; font-weight:800; color:#f0f4ff; margin-bottom:0.25rem; }
+    .tpl-a .tpl-role { font-size:0.72rem; color:var(--accent); letter-spacing:0.1em; text-transform:uppercase; }
+    .tpl-a .tpl-section-title { font-size:0.62rem; color:var(--text-subtle); letter-spacing:0.14em; text-transform:uppercase; margin-bottom:0.5rem; }
+    .tpl-a .tpl-skill-list { display:flex; flex-wrap:wrap; gap:0.3rem; }
+    .tpl-a .tpl-skill {
+      background: rgba(59,130,246,0.12); border:1px solid rgba(59,130,246,0.2);
+      border-radius:4px; padding:0.15rem 0.5rem;
+      font-size:0.66rem; color:rgba(147,197,253,0.9);
+    }
+    .tpl-a .tpl-about-text { font-size:0.72rem; color:var(--text-muted); line-height:1.5; margin-bottom:0.9rem; }
+
+    /* Template B — Sidebar */
+    .tpl-b { background: linear-gradient(135deg, rgba(5,10,25,0.95) 0%, rgba(10,18,38,0.95) 100%); }
+    .tpl-b-layout { display:grid; grid-template-columns:90px 1fr; height:100%; gap:1rem; }
+    .tpl-b-sidebar { background:rgba(59,130,246,0.08); border-radius:10px; padding:0.8rem; }
+    .tpl-b-avatar { width:44px; height:44px; border-radius:50%; background:rgba(59,130,246,0.25); border:1.5px solid rgba(59,130,246,0.35); margin-bottom:0.7rem; }
+    .tpl-b-sname { font-family:'Syne',sans-serif; font-size:0.65rem; font-weight:700; margin-bottom:0.15rem; color:#f0f4ff; }
+    .tpl-b-srole { font-size:0.55rem; color:var(--accent); margin-bottom:0.8rem; }
+    .tpl-b-nav-item { font-size:0.58rem; color:var(--text-muted); margin-bottom:0.4rem; padding-left:0.4rem; border-left:2px solid transparent; }
+    .tpl-b-nav-item.active { color:var(--accent); border-left-color:var(--accent); }
+    .tpl-b-main { padding:0.5rem 0; }
+    .tpl-b-main-title { font-family:'Syne',sans-serif; font-size:1.1rem; font-weight:800; color:#f0f4ff; margin-bottom:0.2rem; }
+    .tpl-b-main-sub { font-size:0.68rem; color:var(--text-muted); margin-bottom:0.8rem; }
+    .tpl-b-proj { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:0.5rem 0.7rem; margin-bottom:0.5rem; }
+    .tpl-b-proj-name { font-size:0.68rem; font-weight:600; color:#e0e9ff; margin-bottom:0.15rem; }
+    .tpl-b-proj-desc { font-size:0.6rem; color:var(--text-muted); }
+
+    /* Template C — Bold header */
+    .tpl-c { background: linear-gradient(135deg, rgba(3,6,18,1) 0%, rgba(6,12,30,1) 100%); }
+    .tpl-c-top { background:linear-gradient(90deg,rgba(59,130,246,0.18),rgba(14,165,233,0.08)); border-radius:10px; padding:1rem 1.2rem; margin-bottom:1rem; display:flex; align-items:center; gap:1rem; }
+    .tpl-c-avatar { width:48px; height:48px; border-radius:12px; background:rgba(59,130,246,0.3); border:1.5px solid rgba(59,130,246,0.4); flex-shrink:0; }
+    .tpl-c-info-name { font-family:'Syne',sans-serif; font-size:1rem; font-weight:800; color:#f0f4ff; }
+    .tpl-c-info-role { font-size:0.65rem; color:rgba(147,197,253,0.8); margin-bottom:0.4rem; }
+    .tpl-c-tags { display:flex; gap:0.3rem; }
+    .tpl-c-tag { background:rgba(59,130,246,0.15); border-radius:4px; padding:0.1rem 0.4rem; font-size:0.58rem; color:rgba(147,197,253,0.9); }
+    .tpl-c-grid { display:grid; grid-template-columns:1fr 1fr; gap:0.6rem; }
+    .tpl-c-block { background:rgba(255,255,255,0.03); border:1px solid rgba(255,255,255,0.07); border-radius:8px; padding:0.6rem 0.8rem; }
+    .tpl-c-block-title { font-size:0.58rem; color:var(--accent); letter-spacing:0.1em; text-transform:uppercase; margin-bottom:0.3rem; }
+    .tpl-c-block-text { font-size:0.65rem; color:var(--text-muted); line-height:1.4; }
+
+    /* Template D — Timeline */
+    .tpl-d { background: linear-gradient(135deg, rgba(4,8,22,0.98) 0%, rgba(8,15,35,0.98) 100%); }
+    .tpl-d-name { font-family:'Syne',sans-serif; font-size:1.2rem; font-weight:800; color:#f0f4ff; margin-bottom:0.1rem; }
+    .tpl-d-line { width:40px; height:2px; background:var(--accent); margin:0.5rem 0 0.8rem; }
+    .tpl-d-meta { font-size:0.68rem; color:var(--accent); margin-bottom:0.9rem; letter-spacing:0.06em; }
+    .tpl-d-timeline { position:relative; padding-left:1.2rem; }
+    .tpl-d-timeline::before { content:''; position:absolute; left:0; top:4px; bottom:4px; width:1px; background:rgba(59,130,246,0.3); }
+    .tpl-d-item { position:relative; margin-bottom:0.7rem; }
+    .tpl-d-item::before { content:''; position:absolute; left:-1.2rem; top:4px; width:6px; height:6px; border-radius:50%; background:var(--accent); }
+    .tpl-d-item-title { font-size:0.7rem; font-weight:600; color:#dde8ff; margin-bottom:0.1rem; }
+    .tpl-d-item-sub { font-size:0.6rem; color:var(--text-muted); }
+
+    /* Card footer */
+    .template-footer {
+      padding: 1.3rem 1.6rem;
+      border-top: 1px solid var(--glass-border);
+      display: flex; align-items: center; justify-content: space-between;
+    }
+
+    .template-info {}
+    .template-name {
+      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
+      margin-bottom: 0.2rem;
+    }
+    .template-meta { font-size: 0.78rem; color: var(--text-muted); }
+
+    .btn-select {
+      background: transparent;
+      border: 1px solid var(--glass-border);
+      border-radius: var(--radius-pill);
+      padding: 0.5rem 1.3rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.82rem; font-weight: 500;
+      color: var(--text-primary); cursor: pointer;
+      transition: all 0.25s cubic-bezier(.34,1.56,.64,1);
+      white-space: nowrap;
+    }
+
+    .btn-select:hover {
+      background: var(--accent); border-color: var(--accent);
+      transform: scale(1.05);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    .btn-select.selected {
+      background: var(--accent); border-color: var(--accent);
+      box-shadow: 0 0 20px var(--accent-glow);
+    }
+
+    /* Selected badge */
+    .selected-badge {
+      position: absolute; top: 1rem; right: 1rem;
+      background: var(--accent); border-radius: var(--radius-pill);
+      padding: 0.25rem 0.7rem;
+      font-size: 0.65rem; font-weight: 600; letter-spacing: 0.08em;
+      text-transform: uppercase; color: #fff;
+      opacity: 0; transform: translateY(-4px);
+      transition: all 0.25s;
+      pointer-events: none;
+    }
+    .template-card.selected-card .selected-badge { opacity: 1; transform: translateY(0); }
+
+    /* Proceed bar */
+    .proceed-bar {
+      position: fixed; bottom: 0; left: 0; right: 0; z-index: 200;
+      background: rgba(2,5,16,0.90);
+      backdrop-filter: blur(24px);
+      border-top: 1px solid var(--glass-border);
+      padding: 1rem 5%;
+      display: flex; align-items: center; justify-content: space-between;
+      flex-wrap: wrap; gap: 1rem;
+      transform: translateY(100%);
+      transition: transform 0.4s cubic-bezier(.34,1.56,.64,1);
+    }
+    .proceed-bar.visible { transform: translateY(0); }
+
+    .proceed-info { font-size: 0.9rem; }
+    .proceed-info strong { font-family: 'Syne', sans-serif; }
+    .proceed-info small { color: var(--text-muted); font-size: 0.78rem; display: block; }
+
+    .btn-proceed {
+      background: var(--accent); color: #fff;
+      border: none; border-radius: var(--radius-pill);
+      padding: 0.75rem 2rem;
+      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
+      cursor: pointer;
+      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s;
+      box-shadow: 0 0 24px var(--accent-glow);
+    }
+    .btn-proceed:hover { transform: scale(1.04); box-shadow: 0 0 36px var(--accent-glow); }
+
+    @media (max-width: 768px) {
+      .nav-links { display: none; }
+      .templates-grid { grid-template-columns: 1fr; }
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg-canvas"></div>
+<div class="bg-grid"></div>
+
+<nav>
+  <a href="index.html" class="nav-logo">Folio<span>.</span></a>
+  <ul class="nav-links">
+    <li><a href="index.html">Home</a></li>
+    <li><a href="templates.html" style="color:var(--text-primary)">Templates</a></li>
+    <li><a href="editor.html">Editor</a></li>
+  </ul>
+  <a href="editor.html" class="nav-cta">Start Building</a>
+</nav>
+
+<div class="page-wrap">
+
+  <div class="page-header">
+    <div class="page-badge">Choose Your Style</div>
+    <h1 class="page-title">Select a Template</h1>
+    <p class="page-desc">Four professionally designed portfolio layouts. Pick the one that best represents you.</p>
+  </div>
+
+  <div class="filter-tabs">
+    <button class="filter-tab active">All Templates</button>
+    <button class="filter-tab">Minimal</button>
+    <button class="filter-tab">Creative</button>
+    <button class="filter-tab">Technical</button>
+  </div>
+
+  <div class="templates-section">
+    <div class="templates-grid">
+
+      <!-- Template 1: Minimal -->
+      <div class="template-card" data-template="minimal" onclick="selectTemplate(this, 'minimal')">
+        <div class="selected-badge">Selected</div>
+        <div class="template-preview tpl-a">
+          <div class="tpl-a">
+            <div class="tpl-header">
+              <div class="tpl-name">Your Name</div>
+              <div class="tpl-role">Software Engineer — Computer Science</div>
+            </div>
+            <div class="tpl-section-title">About</div>
+            <div class="tpl-about-text">A passionate developer with a focus on building elegant, efficient solutions.</div>
+            <div class="tpl-section-title">Skills</div>
+            <div class="tpl-skill-list">
+              <span class="tpl-skill">JavaScript</span>
+              <span class="tpl-skill">React</span>
+              <span class="tpl-skill">Python</span>
+              <span class="tpl-skill">Node.js</span>
+              <span class="tpl-skill">CSS</span>
+            </div>
+          </div>
+        </div>
+        <div class="template-footer">
+          <div class="template-info">
+            <div class="template-name">Minimal</div>
+            <div class="template-meta">Clean typography focus</div>
+          </div>
+          <button class="btn-select" data-template="minimal">Select</button>
+        </div>
+      </div>
+
+      <!-- Template 2: Sidebar -->
+      <div class="template-card" data-template="sidebar" onclick="selectTemplate(this, 'sidebar')">
+        <div class="selected-badge">Selected</div>
+        <div class="template-preview tpl-b">
+          <div class="tpl-b-layout">
+            <div class="tpl-b-sidebar">
+              <div class="tpl-b-avatar"></div>
+              <div class="tpl-b-sname">Your Name</div>
+              <div class="tpl-b-srole">Developer</div>
+              <div class="tpl-b-nav-item active">About</div>
+              <div class="tpl-b-nav-item">Projects</div>
+              <div class="tpl-b-nav-item">Skills</div>
+              <div class="tpl-b-nav-item">Contact</div>
+            </div>
+            <div class="tpl-b-main">
+              <div class="tpl-b-main-title">Projects</div>
+              <div class="tpl-b-main-sub">Recent work and contributions</div>
+              <div class="tpl-b-proj">
+                <div class="tpl-b-proj-name">E-Commerce Platform</div>
+                <div class="tpl-b-proj-desc">React, Node.js, MongoDB</div>
+              </div>
+              <div class="tpl-b-proj">
+                <div class="tpl-b-proj-name">ML Dashboard</div>
+                <div class="tpl-b-proj-desc">Python, TensorFlow, Flask</div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="template-footer">
+          <div class="template-info">
+            <div class="template-name">Sidebar</div>
+            <div class="template-meta">Navigation-focused layout</div>
+          </div>
+          <button class="btn-select" data-template="sidebar">Select</button>
+        </div>
+      </div>
+
+      <!-- Template 3: Bold -->
+      <div class="template-card" data-template="bold" onclick="selectTemplate(this, 'bold')">
+        <div class="selected-badge">Selected</div>
+        <div class="template-preview tpl-c">
+          <div class="tpl-c-top">
+            <div class="tpl-c-avatar"></div>
+            <div>
+              <div class="tpl-c-info-name">Your Name</div>
+              <div class="tpl-c-info-role">UI/UX Designer</div>
+              <div class="tpl-c-tags">
+                <span class="tpl-c-tag">Design</span>
+                <span class="tpl-c-tag">Figma</span>
+                <span class="tpl-c-tag">CSS</span>
+              </div>
+            </div>
+          </div>
+          <div class="tpl-c-grid">
+            <div class="tpl-c-block">
+              <div class="tpl-c-block-title">About</div>
+              <div class="tpl-c-block-text">Creative designer with 2 years of experience in user-centric design.</div>
+            </div>
+            <div class="tpl-c-block">
+              <div class="tpl-c-block-title">Contact</div>
+              <div class="tpl-c-block-text">email@domain.com<br/>github.com/user</div>
+            </div>
+          </div>
+        </div>
+        <div class="template-footer">
+          <div class="template-info">
+            <div class="template-name">Bold</div>
+            <div class="template-meta">Visual-first layout</div>
+          </div>
+          <button class="btn-select" data-template="bold">Select</button>
+        </div>
+      </div>
+
+      <!-- Template 4: Timeline -->
+      <div class="template-card" data-template="timeline" onclick="selectTemplate(this, 'timeline')">
+        <div class="selected-badge">Selected</div>
+        <div class="template-preview tpl-d">
+          <div class="tpl-d-name">Your Name</div>
+          <div class="tpl-d-meta">Data Scientist — Machine Learning</div>
+          <div class="tpl-d-line"></div>
+          <div class="tpl-d-timeline">
+            <div class="tpl-d-item">
+              <div class="tpl-d-item-title">Machine Learning Specialization</div>
+              <div class="tpl-d-item-sub">Coursera — 2024</div>
+            </div>
+            <div class="tpl-d-item">
+              <div class="tpl-d-item-title">Predictive Analytics Project</div>
+              <div class="tpl-d-item-sub">Scikit-Learn, Pandas, Matplotlib</div>
+            </div>
+            <div class="tpl-d-item">
+              <div class="tpl-d-item-title">AWS Cloud Practitioner</div>
+              <div class="tpl-d-item-sub">Amazon Web Services — 2023</div>
+            </div>
+          </div>
+        </div>
+        <div class="template-footer">
+          <div class="template-info">
+            <div class="template-name">Timeline</div>
+            <div class="template-meta">Achievement-focused layout</div>
+          </div>
+          <button class="btn-select" data-template="timeline">Select</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /page-wrap -->
+
+<!-- Proceed bar -->
+<div class="proceed-bar" id="proceedBar">
+  <div class="proceed-info">
+    <strong id="proceedTemplateName">Template Selected</strong>
+    <small>Ready to customize with your details</small>
+  </div>
+  <button class="btn-proceed" onclick="proceedToEditor()">Customize Template</button>
+</div>
+
+<script>
+  let currentTemplate = null;
+
+  // Restore previous selection
+  const savedTemplate = localStorage.getItem('folioTemplate');
+  if (savedTemplate) {
+    const card = document.querySelector(`[data-template="${savedTemplate}"]`);
+    if (card) {
+      card.classList.add('selected-card');
+      card.querySelector('.btn-select').classList.add('selected');
+      currentTemplate = savedTemplate;
+      showProceedBar(savedTemplate);
+    }
+  }
+
+  function selectTemplate(card, templateId) {
+    // Deselect all
+    document.querySelectorAll('.template-card').forEach(c => {
+      c.classList.remove('selected-card');
+      c.querySelector('.btn-select').classList.remove('selected');
+    });
+
+    // Select this
+    card.classList.add('selected-card');
+    card.querySelector('.btn-select').classList.add('selected');
+    currentTemplate = templateId;
+    localStorage.setItem('folioTemplate', templateId);
+    showProceedBar(templateId);
+  }
+
+  function showProceedBar(templateId) {
+    const names = {
+      minimal: 'Minimal Template',
+      sidebar: 'Sidebar Template',
+      bold: 'Bold Template',
+      timeline: 'Timeline Template'
+    };
+    document.getElementById('proceedTemplateName').textContent = names[templateId] || templateId;
+    document.getElementById('proceedBar').classList.add('visible');
+  }
+
+  function proceedToEditor() {
+    if (currentTemplate) {
+      window.location.href = 'editor.html';
+    }
+  }
+
+  // Filter tabs (visual only)
+  document.querySelectorAll('.filter-tab').forEach(tab => {
+    tab.addEventListener('click', function() {
+      document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+      this.classList.add('active');
+    });
+  });
+</script>
+</body>
+</html>
