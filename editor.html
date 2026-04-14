@@ -1,783 +1,1167 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Editor — Folio</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23020510'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='34' font-family='Arial' fill='%233b82f6'%3EF%3C/text%3E%3C/svg%3E" />
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet" />
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Editor — Folio</title>
+    <link
+      rel="icon"
+      type="image/svg+xml"
+      href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23020510'/%3E%3Ctext x='50%25' y='54%25' dominant-baseline='middle' text-anchor='middle' font-size='34' font-family='Arial' fill='%233b82f6'%3EF%3C/text%3E%3C/svg%3E"
+    />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:wght@300;400;500&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
 
-    :root {
-      --bg-deep:    #020510;
-      --glass-bg:   rgba(255,255,255,0.04);
-      --glass-border: rgba(255,255,255,0.08);
-      --accent:     #3b82f6;
-      --accent-glow: rgba(59,130,246,0.35);
-      --accent-soft: rgba(59,130,246,0.12);
-      --input-bg:   rgba(255,255,255,0.05);
-      --input-border: rgba(255,255,255,0.10);
-      --input-focus: rgba(59,130,246,0.55);
-      --text-primary: #f0f4ff;
-      --text-muted:   rgba(200,210,240,0.55);
-      --text-subtle:  rgba(200,210,240,0.30);
-      --radius-lg:  18px;
-      --radius-md:  12px;
-      --radius-pill: 999px;
-    }
+      :root {
+        --bg-deep: #020510;
+        --glass-bg: rgba(255, 255, 255, 0.04);
+        --glass-border: rgba(255, 255, 255, 0.08);
+        --accent: #3b82f6;
+        --accent-glow: rgba(59, 130, 246, 0.35);
+        --accent-soft: rgba(59, 130, 246, 0.12);
+        --input-bg: rgba(255, 255, 255, 0.05);
+        --input-border: rgba(255, 255, 255, 0.1);
+        --input-focus: rgba(59, 130, 246, 0.55);
+        --text-primary: #f0f4ff;
+        --text-muted: rgba(200, 210, 240, 0.55);
+        --text-subtle: rgba(200, 210, 240, 0.3);
+        --radius-lg: 18px;
+        --radius-md: 12px;
+        --radius-pill: 999px;
+      }
 
-    html { scroll-behavior: smooth; }
+      html {
+        scroll-behavior: smooth;
+      }
 
-    body {
-      font-family: 'DM Sans', sans-serif;
-      background: var(--bg-deep);
-      color: var(--text-primary);
-      min-height: 100vh;
-      overflow-x: hidden;
-    }
+      body {
+        font-family: "DM Sans", sans-serif;
+        background: var(--bg-deep);
+        color: var(--text-primary);
+        min-height: 100vh;
+        overflow-x: hidden;
+      }
 
-    .bg-canvas {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(30,64,175,0.28) 0%, transparent 70%),
-        radial-gradient(ellipse 50% 40% at 90% 90%, rgba(14,165,233,0.08) 0%, transparent 60%),
-        linear-gradient(160deg, #020510 0%, #060d1f 50%, #020a18 100%);
-    }
+      .bg-canvas {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(
+            ellipse 80% 60% at 50% -10%,
+            rgba(30, 64, 175, 0.28) 0%,
+            transparent 70%
+          ),
+          radial-gradient(
+            ellipse 50% 40% at 90% 90%,
+            rgba(14, 165, 233, 0.08) 0%,
+            transparent 60%
+          ),
+          linear-gradient(160deg, #020510 0%, #060d1f 50%, #020a18 100%);
+      }
 
-    .bg-grid {
-      position: fixed; inset: 0; z-index: 0; pointer-events: none;
-      background-image:
-        linear-gradient(rgba(59,130,246,0.04) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(59,130,246,0.04) 1px, transparent 1px);
-      background-size: 60px 60px;
-    }
+      .bg-grid {
+        position: fixed;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background-image:
+          linear-gradient(rgba(59, 130, 246, 0.04) 1px, transparent 1px),
+          linear-gradient(90deg, rgba(59, 130, 246, 0.04) 1px, transparent 1px);
+        background-size: 60px 60px;
+      }
 
-    nav {
-      position: fixed; top: 0; left: 0; right: 0; z-index: 100;
-      display: flex; align-items: center; justify-content: space-between;
-      padding: 0 5%; height: 70px;
-      background: rgba(2,5,16,0.80);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--glass-border);
-    }
+      nav {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        z-index: 100;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 5%;
+        height: 70px;
+        background: rgba(2, 5, 16, 0.8);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid var(--glass-border);
+      }
 
-    .nav-logo {
-      font-family: 'Syne', sans-serif; font-size: 1.4rem; font-weight: 800;
-      color: var(--text-primary); text-decoration: none;
-    }
-    .nav-logo span { color: var(--accent); }
+      .nav-logo {
+        font-family: "Syne", sans-serif;
+        font-size: 1.4rem;
+        font-weight: 800;
+        color: var(--text-primary);
+        text-decoration: none;
+      }
+      .nav-logo span {
+        color: var(--accent);
+      }
 
-    .nav-steps {
-      display: flex; align-items: center; gap: 0.5rem;
-      font-size: 0.78rem;
-    }
+      .nav-steps {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+        font-size: 0.78rem;
+      }
 
-    .nav-step {
-      padding: 0.3rem 0.8rem; border-radius: var(--radius-pill);
-      font-weight: 500; color: var(--text-muted);
-    }
-    .nav-step.done {
-      background: var(--accent-soft); color: var(--accent);
-      border: 1px solid rgba(59,130,246,0.3);
-    }
-    .nav-step.current {
-      background: var(--accent); color: #fff;
-    }
-    .nav-step-sep { color: var(--text-subtle); }
+      .nav-step {
+        padding: 0.3rem 0.8rem;
+        border-radius: var(--radius-pill);
+        font-weight: 500;
+        color: var(--text-muted);
+      }
+      .nav-step.done {
+        background: var(--accent-soft);
+        color: var(--accent);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+      }
+      .nav-step.current {
+        background: var(--accent);
+        color: #fff;
+      }
+      .nav-step-sep {
+        color: var(--text-subtle);
+      }
 
-    .page-wrap { position: relative; z-index: 1; padding-top: 70px; }
+      .page-wrap {
+        position: relative;
+        z-index: 1;
+        padding-top: 70px;
+      }
 
-    /* ── Layout ── */
-    .editor-layout {
-      max-width: 1200px; margin: 0 auto;
-      padding: 60px 5% 100px;
-      display: grid;
-      grid-template-columns: 1fr 400px;
-      gap: 3rem;
-      align-items: start;
-    }
+      /* ── Layout ── */
+      .editor-layout {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 5% 100px;
+        display: grid;
+        grid-template-columns: 1fr 400px;
+        gap: 3rem;
+        align-items: start;
+      }
 
-    /* ── Left: Sidebar info ── */
-    .editor-sidebar {
-      position: sticky; top: 100px;
-    }
+      /* ── Left: Sidebar info ── */
+      .editor-sidebar {
+        position: sticky;
+        top: 100px;
+      }
 
-    .editor-sidebar-badge {
-      display: inline-block;
-      background: var(--glass-bg); border: 1px solid var(--glass-border);
-      border-radius: var(--radius-pill);
-      padding: 0.3rem 0.9rem;
-      font-size: 0.7rem; font-weight: 600;
-      letter-spacing: 0.12em; text-transform: uppercase;
-      color: var(--accent); margin-bottom: 1.5rem;
-      backdrop-filter: blur(10px);
-    }
+      .editor-sidebar-badge {
+        display: inline-block;
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-pill);
+        padding: 0.3rem 0.9rem;
+        font-size: 0.7rem;
+        font-weight: 600;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--accent);
+        margin-bottom: 1.5rem;
+        backdrop-filter: blur(10px);
+      }
 
-    .editor-sidebar-title {
-      font-family: 'Syne', sans-serif;
-      font-size: 2.4rem; font-weight: 800;
-      line-height: 1.1; letter-spacing: -0.03em;
-      margin-bottom: 1rem;
-    }
+      .editor-sidebar-title {
+        font-family: "Syne", sans-serif;
+        font-size: 2.4rem;
+        font-weight: 800;
+        line-height: 1.1;
+        letter-spacing: -0.03em;
+        margin-bottom: 1rem;
+      }
 
-    .editor-sidebar-desc {
-      color: var(--text-muted); font-size: 0.9rem;
-      line-height: 1.7; font-weight: 300; margin-bottom: 2rem;
-    }
+      .editor-sidebar-desc {
+        color: var(--text-muted);
+        font-size: 0.9rem;
+        line-height: 1.7;
+        font-weight: 300;
+        margin-bottom: 2rem;
+      }
 
-    .template-indicator {
-      background: var(--glass-bg); border: 1px solid var(--glass-border);
-      border-radius: var(--radius-md); padding: 1rem 1.2rem;
-      backdrop-filter: blur(12px);
-      display: flex; align-items: center; justify-content: space-between;
-      margin-bottom: 1.5rem;
-    }
+      .template-indicator {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-md);
+        padding: 1rem 1.2rem;
+        backdrop-filter: blur(12px);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        margin-bottom: 1.5rem;
+      }
 
-    .ti-label { font-size: 0.7rem; color: var(--text-subtle); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 0.2rem; }
-    .ti-name { font-family: 'Syne', sans-serif; font-size: 0.95rem; font-weight: 700; }
+      .ti-label {
+        font-size: 0.7rem;
+        color: var(--text-subtle);
+        letter-spacing: 0.1em;
+        text-transform: uppercase;
+        margin-bottom: 0.2rem;
+      }
+      .ti-name {
+        font-family: "Syne", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 700;
+      }
 
-    .ti-change {
-      font-size: 0.75rem; color: var(--accent);
-      text-decoration: none; font-weight: 500;
-      padding: 0.3rem 0.7rem;
-      border: 1px solid rgba(59,130,246,0.3);
-      border-radius: var(--radius-pill);
-      transition: all 0.2s;
-    }
-    .ti-change:hover { background: var(--accent-soft); }
+      .ti-change {
+        font-size: 0.75rem;
+        color: var(--accent);
+        text-decoration: none;
+        font-weight: 500;
+        padding: 0.3rem 0.7rem;
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: var(--radius-pill);
+        transition: all 0.2s;
+      }
+      .ti-change:hover {
+        background: var(--accent-soft);
+      }
 
-    .tips-list {
-      list-style: none; display: flex; flex-direction: column; gap: 0.7rem;
-    }
+      .tips-list {
+        list-style: none;
+        display: flex;
+        flex-direction: column;
+        gap: 0.7rem;
+      }
 
-    .tips-list li {
-      display: flex; gap: 0.7rem; align-items: flex-start;
-      font-size: 0.82rem; color: var(--text-muted);
-      line-height: 1.5;
-    }
+      .tips-list li {
+        display: flex;
+        gap: 0.7rem;
+        align-items: flex-start;
+        font-size: 0.82rem;
+        color: var(--text-muted);
+        line-height: 1.5;
+      }
 
-    .tip-num {
-      width: 20px; height: 20px; border-radius: 50%;
-      background: var(--accent-soft); border: 1px solid rgba(59,130,246,0.25);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.6rem; font-weight: 700; color: var(--accent);
-      flex-shrink: 0; margin-top: 1px;
-    }
+      .tip-num {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background: var(--accent-soft);
+        border: 1px solid rgba(59, 130, 246, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.6rem;
+        font-weight: 700;
+        color: var(--accent);
+        flex-shrink: 0;
+        margin-top: 1px;
+      }
 
-    /* ── Right: Form ── */
-    .editor-form-card {
-      background: var(--glass-bg);
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-lg);
-      backdrop-filter: blur(20px);
-      padding: 2.5rem;
-      box-shadow: 0 40px 80px rgba(0,0,0,0.5);
-    }
+      /* ── Right: Form ── */
+      .editor-form-card {
+        background: var(--glass-bg);
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-lg);
+        backdrop-filter: blur(20px);
+        padding: 2.5rem;
+        box-shadow: 0 40px 80px rgba(0, 0, 0, 0.5);
+      }
 
-    .form-section {
-      margin-bottom: 2.5rem;
-    }
+      .form-section {
+        margin-bottom: 2.5rem;
+      }
 
-    .form-section-header {
-      display: flex; align-items: center; gap: 0.8rem;
-      margin-bottom: 1.5rem; padding-bottom: 0.9rem;
-      border-bottom: 1px solid var(--glass-border);
-    }
+      .form-section-header {
+        display: flex;
+        align-items: center;
+        gap: 0.8rem;
+        margin-bottom: 1.5rem;
+        padding-bottom: 0.9rem;
+        border-bottom: 1px solid var(--glass-border);
+      }
 
-    .fsh-num {
-      width: 28px; height: 28px; border-radius: 8px;
-      background: var(--accent-soft); border: 1px solid rgba(59,130,246,0.3);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 0.7rem; font-weight: 700; color: var(--accent);
-      flex-shrink: 0;
-    }
+      .fsh-num {
+        width: 28px;
+        height: 28px;
+        border-radius: 8px;
+        background: var(--accent-soft);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 0.7rem;
+        font-weight: 700;
+        color: var(--accent);
+        flex-shrink: 0;
+      }
 
-    .fsh-title {
-      font-family: 'Syne', sans-serif; font-size: 1rem; font-weight: 700;
-    }
+      .fsh-title {
+        font-family: "Syne", sans-serif;
+        font-size: 1rem;
+        font-weight: 700;
+      }
 
-    .fsh-subtitle {
-      font-size: 0.72rem; color: var(--text-muted); margin-left: auto;
-    }
+      .fsh-subtitle {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        margin-left: auto;
+      }
 
-    /* Avatar upload */
-    .avatar-upload {
-      display: flex; align-items: center; gap: 1.2rem;
-      margin-bottom: 1.5rem;
-    }
+      /* Avatar upload */
+      .avatar-upload {
+        display: flex;
+        align-items: center;
+        gap: 1.2rem;
+        margin-bottom: 1.5rem;
+      }
 
-    .avatar-preview {
-      width: 72px; height: 72px; border-radius: 50%;
-      background: var(--input-bg);
-      border: 2px dashed var(--input-border);
-      overflow: hidden; flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      transition: border-color 0.2s;
-    }
-    .avatar-preview:hover { border-color: rgba(59,130,246,0.5); }
-    .avatar-preview img { width:100%; height:100%; object-fit:cover; display:none; }
+      .avatar-preview {
+        width: 72px;
+        height: 72px;
+        border-radius: 50%;
+        background: var(--input-bg);
+        border: 2px dashed var(--input-border);
+        overflow: hidden;
+        flex-shrink: 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: border-color 0.2s;
+      }
+      .avatar-preview:hover {
+        border-color: rgba(59, 130, 246, 0.5);
+      }
+      .avatar-preview img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: none;
+      }
 
-    .avatar-placeholder {
-      text-align: center;
-    }
-    .avatar-placeholder-text {
-      font-size: 0.6rem; color: var(--text-subtle); letter-spacing: 0.06em;
-    }
+      .avatar-placeholder {
+        text-align: center;
+      }
+      .avatar-placeholder-text {
+        font-size: 0.6rem;
+        color: var(--text-subtle);
+        letter-spacing: 0.06em;
+      }
 
-    .avatar-upload-info {}
-    .avatar-upload-label {
-      font-size: 0.85rem; font-weight: 500; margin-bottom: 0.3rem;
-    }
-    .avatar-upload-hint {
-      font-size: 0.72rem; color: var(--text-muted); margin-bottom: 0.7rem;
-    }
+      .avatar-upload-info {
+      }
+      .avatar-upload-label {
+        font-size: 0.85rem;
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+      }
+      .avatar-upload-hint {
+        font-size: 0.72rem;
+        color: var(--text-muted);
+        margin-bottom: 0.7rem;
+      }
 
-    .btn-upload {
-      background: var(--glass-bg); border: 1px solid var(--input-border);
-      border-radius: var(--radius-pill);
-      padding: 0.4rem 1rem;
-      font-family: 'DM Sans', sans-serif; font-size: 0.78rem; font-weight: 500;
-      color: var(--text-primary); cursor: pointer;
-      transition: all 0.2s;
-      position: relative; overflow: hidden;
-    }
-    .btn-upload:hover { border-color: rgba(59,130,246,0.4); background: var(--accent-soft); }
-    .btn-upload input { position:absolute; inset:0; opacity:0; cursor:pointer; }
+      .btn-upload {
+        background: var(--glass-bg);
+        border: 1px solid var(--input-border);
+        border-radius: var(--radius-pill);
+        padding: 0.4rem 1rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.78rem;
+        font-weight: 500;
+        color: var(--text-primary);
+        cursor: pointer;
+        transition: all 0.2s;
+        position: relative;
+        overflow: hidden;
+      }
+      .btn-upload:hover {
+        border-color: rgba(59, 130, 246, 0.4);
+        background: var(--accent-soft);
+      }
+      .btn-upload input {
+        position: absolute;
+        inset: 0;
+        opacity: 0;
+        cursor: pointer;
+      }
 
-    /* Form fields */
-    .field-group { margin-bottom: 1.2rem; }
-    .field-row { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+      /* Form fields */
+      .field-group {
+        margin-bottom: 1.2rem;
+      }
+      .field-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+      }
 
-    label {
-      display: block; font-size: 0.75rem; font-weight: 500;
-      letter-spacing: 0.05em; color: var(--text-muted);
-      margin-bottom: 0.45rem;
-      text-transform: uppercase;
-    }
+      label {
+        display: block;
+        font-size: 0.75rem;
+        font-weight: 500;
+        letter-spacing: 0.05em;
+        color: var(--text-muted);
+        margin-bottom: 0.45rem;
+        text-transform: uppercase;
+      }
 
-    input[type="text"],
-    input[type="email"],
-    input[type="url"],
-    textarea {
-      width: 100%;
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: 10px;
-      padding: 0.75rem 1rem;
-      font-family: 'DM Sans', sans-serif;
-      font-size: 0.9rem; font-weight: 400;
-      color: var(--text-primary);
-      transition: border-color 0.25s, box-shadow 0.25s, background 0.25s;
-      outline: none;
-      resize: vertical;
-    }
+      input[type="text"],
+      input[type="email"],
+      input[type="url"],
+      textarea {
+        width: 100%;
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 400;
+        color: var(--text-primary);
+        transition:
+          border-color 0.25s,
+          box-shadow 0.25s,
+          background 0.25s;
+        outline: none;
+        resize: vertical;
+      }
 
-    input::placeholder,
-    textarea::placeholder { color: var(--text-subtle); }
+      input::placeholder,
+      textarea::placeholder {
+        color: var(--text-subtle);
+      }
 
-    input:focus,
-    textarea:focus {
-      border-color: var(--input-focus);
-      background: rgba(59,130,246,0.06);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.12), 0 0 20px rgba(59,130,246,0.08);
-    }
+      input:focus,
+      textarea:focus {
+        border-color: var(--input-focus);
+        background: rgba(59, 130, 246, 0.06);
+        box-shadow:
+          0 0 0 3px rgba(59, 130, 246, 0.12),
+          0 0 20px rgba(59, 130, 246, 0.08);
+      }
 
-    textarea { min-height: 100px; }
+      textarea {
+        min-height: 100px;
+      }
 
-    /* Skills tags input */
-    .tags-input-wrap {
-      background: var(--input-bg);
-      border: 1px solid var(--input-border);
-      border-radius: 10px;
-      padding: 0.6rem 0.8rem;
-      min-height: 52px;
-      display: flex; flex-wrap: wrap; gap: 0.4rem; align-items: center;
-      cursor: text;
-      transition: border-color 0.25s, box-shadow 0.25s;
-    }
-    .tags-input-wrap:focus-within {
-      border-color: var(--input-focus);
-      box-shadow: 0 0 0 3px rgba(59,130,246,0.12);
-    }
+      /* Skills tags input */
+      .tags-input-wrap {
+        background: var(--input-bg);
+        border: 1px solid var(--input-border);
+        border-radius: 10px;
+        padding: 0.6rem 0.8rem;
+        min-height: 52px;
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.4rem;
+        align-items: center;
+        cursor: text;
+        transition:
+          border-color 0.25s,
+          box-shadow 0.25s;
+      }
+      .tags-input-wrap:focus-within {
+        border-color: var(--input-focus);
+        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.12);
+      }
 
-    .tag-chip {
-      background: var(--accent-soft); border: 1px solid rgba(59,130,246,0.3);
-      border-radius: var(--radius-pill);
-      padding: 0.2rem 0.7rem;
-      font-size: 0.78rem; color: rgba(147,197,253,0.95);
-      display: flex; align-items: center; gap: 0.4rem;
-      animation: tagIn 0.25s cubic-bezier(.34,1.56,.64,1) both;
-    }
+      .tag-chip {
+        background: var(--accent-soft);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: var(--radius-pill);
+        padding: 0.2rem 0.7rem;
+        font-size: 0.78rem;
+        color: rgba(147, 197, 253, 0.95);
+        display: flex;
+        align-items: center;
+        gap: 0.4rem;
+        animation: tagIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1) both;
+      }
 
-    .tag-chip-remove {
-      background: none; border: none; cursor: pointer;
-      color: rgba(147,197,253,0.6); font-size: 0.9rem; line-height:1;
-      padding: 0; transition: color 0.15s;
-    }
-    .tag-chip-remove:hover { color: #ff6b6b; }
+      .tag-chip-remove {
+        background: none;
+        border: none;
+        cursor: pointer;
+        color: rgba(147, 197, 253, 0.6);
+        font-size: 0.9rem;
+        line-height: 1;
+        padding: 0;
+        transition: color 0.15s;
+      }
+      .tag-chip-remove:hover {
+        color: #ff6b6b;
+      }
 
-    .tags-text-input {
-      background: none; border: none; outline: none;
-      color: var(--text-primary);
-      font-family: 'DM Sans', sans-serif; font-size: 0.9rem;
-      min-width: 140px; flex: 1;
-    }
-    .tags-text-input::placeholder { color: var(--text-subtle); }
+      .tags-text-input {
+        background: none;
+        border: none;
+        outline: none;
+        color: var(--text-primary);
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.9rem;
+        min-width: 140px;
+        flex: 1;
+      }
+      .tags-text-input::placeholder {
+        color: var(--text-subtle);
+      }
 
-    .field-hint { font-size: 0.7rem; color: var(--text-subtle); margin-top: 0.4rem; }
+      .field-hint {
+        font-size: 0.7rem;
+        color: var(--text-subtle);
+        margin-top: 0.4rem;
+      }
 
-    /* Form actions */
-    .form-actions {
-      display: flex; gap: 0.8rem; align-items: center;
-      padding-top: 1rem; border-top: 1px solid var(--glass-border);
-      flex-wrap: wrap;
-    }
+      /* Form actions */
+      .form-actions {
+        display: flex;
+        gap: 0.8rem;
+        align-items: center;
+        padding-top: 1rem;
+        border-top: 1px solid var(--glass-border);
+        flex-wrap: wrap;
+      }
 
-    .btn-preview {
-      background: var(--accent); color: #fff;
-      border: none; border-radius: var(--radius-pill);
-      padding: 0.85rem 2.2rem;
-      font-family: 'DM Sans', sans-serif; font-size: 0.95rem; font-weight: 500;
-      cursor: pointer; flex: 1;
-      transition: transform 0.25s cubic-bezier(.34,1.56,.64,1), box-shadow 0.25s;
-      box-shadow: 0 0 24px var(--accent-glow);
-    }
-    .btn-preview:hover { transform: translateY(-2px) scale(1.02); box-shadow: 0 0 40px var(--accent-glow); }
-    .btn-preview:active { transform: translateY(0) scale(0.98); }
+      .btn-preview {
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: var(--radius-pill);
+        padding: 0.85rem 2.2rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.95rem;
+        font-weight: 500;
+        cursor: pointer;
+        flex: 1;
+        transition:
+          transform 0.25s cubic-bezier(0.34, 1.56, 0.64, 1),
+          box-shadow 0.25s;
+        box-shadow: 0 0 24px var(--accent-glow);
+      }
+      .btn-preview:hover {
+        transform: translateY(-2px) scale(1.02);
+        box-shadow: 0 0 40px var(--accent-glow);
+      }
+      .btn-preview:active {
+        transform: translateY(0) scale(0.98);
+      }
 
-    .btn-save-draft {
-      background: transparent;
-      border: 1px solid var(--glass-border);
-      border-radius: var(--radius-pill);
-      padding: 0.85rem 1.5rem;
-      font-family: 'DM Sans', sans-serif; font-size: 0.9rem; font-weight: 500;
-      color: var(--text-muted); cursor: pointer;
-      transition: all 0.2s;
-    }
-    .btn-save-draft:hover { border-color: rgba(255,255,255,0.2); color: var(--text-primary); }
+      .btn-save-draft {
+        background: transparent;
+        border: 1px solid var(--glass-border);
+        border-radius: var(--radius-pill);
+        padding: 0.85rem 1.5rem;
+        font-family: "DM Sans", sans-serif;
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: var(--text-muted);
+        cursor: pointer;
+        transition: all 0.2s;
+      }
+      .btn-save-draft:hover {
+        border-color: rgba(255, 255, 255, 0.2);
+        color: var(--text-primary);
+      }
 
-    /* Toast */
-    .toast {
-      position: fixed; bottom: 2rem; right: 2rem; z-index: 300;
-      background: rgba(15,25,50,0.95);
-      border: 1px solid rgba(59,130,246,0.3);
-      border-radius: var(--radius-md);
-      padding: 0.9rem 1.3rem;
-      font-size: 0.85rem; font-weight: 500;
-      backdrop-filter: blur(20px);
-      transform: translateY(20px); opacity: 0;
-      transition: all 0.3s cubic-bezier(.34,1.56,.64,1);
-      box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast-title { color: var(--text-primary); margin-bottom: 0.1rem; }
-    .toast-sub { color: var(--text-muted); font-size: 0.75rem; font-weight: 400; }
+      /* Toast */
+      .toast {
+        position: fixed;
+        bottom: 2rem;
+        right: 2rem;
+        z-index: 300;
+        background: rgba(15, 25, 50, 0.95);
+        border: 1px solid rgba(59, 130, 246, 0.3);
+        border-radius: var(--radius-md);
+        padding: 0.9rem 1.3rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        backdrop-filter: blur(20px);
+        transform: translateY(20px);
+        opacity: 0;
+        transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5);
+      }
+      .toast.show {
+        transform: translateY(0);
+        opacity: 1;
+      }
+      .toast-title {
+        color: var(--text-primary);
+        margin-bottom: 0.1rem;
+      }
+      .toast-sub {
+        color: var(--text-muted);
+        font-size: 0.75rem;
+        font-weight: 400;
+      }
 
-    /* Progress bar */
-    .progress-bar-wrap {
-      height: 3px; background: var(--glass-bg);
-      border-radius: 2px; margin-bottom: 2rem; overflow: hidden;
-    }
-    .progress-bar-fill {
-      height: 100%; border-radius: 2px;
-      background: linear-gradient(90deg, var(--accent), #38bdf8);
-      transition: width 0.5s ease;
-    }
+      /* Progress bar */
+      .progress-bar-wrap {
+        height: 3px;
+        background: var(--glass-bg);
+        border-radius: 2px;
+        margin-bottom: 2rem;
+        overflow: hidden;
+      }
+      .progress-bar-fill {
+        height: 100%;
+        border-radius: 2px;
+        background: linear-gradient(90deg, var(--accent), #38bdf8);
+        transition: width 0.5s ease;
+      }
 
-    @keyframes tagIn {
-      from { opacity: 0; transform: scale(0.8); }
-      to   { opacity: 1; transform: scale(1); }
-    }
+      @keyframes tagIn {
+        from {
+          opacity: 0;
+          transform: scale(0.8);
+        }
+        to {
+          opacity: 1;
+          transform: scale(1);
+        }
+      }
 
-    @media (max-width: 900px) {
-      .editor-layout { grid-template-columns: 1fr; }
-      .editor-sidebar { position: static; }
-      .field-row { grid-template-columns: 1fr; }
-    }
+      @media (max-width: 900px) {
+        .editor-layout {
+          grid-template-columns: 1fr;
+        }
+        .editor-sidebar {
+          position: static;
+        }
+        .field-row {
+          grid-template-columns: 1fr;
+        }
+      }
 
-    @media (max-width: 600px) {
-      .editor-form-card { padding: 1.5rem; }
-      nav .nav-steps { display: none; }
-    }
-  </style>
-</head>
-<body>
+      @media (max-width: 600px) {
+        .editor-form-card {
+          padding: 1.5rem;
+        }
+        nav .nav-steps {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="bg-canvas"></div>
+    <div class="bg-grid"></div>
 
-<div class="bg-canvas"></div>
-<div class="bg-grid"></div>
-
-<nav>
-  <a href="index.html" class="nav-logo">Folio<span>.</span></a>
-  <div class="nav-steps">
-    <a href="templates.html" class="nav-step done">Template</a>
-    <span class="nav-step-sep">›</span>
-    <span class="nav-step current">Details</span>
-    <span class="nav-step-sep">›</span>
-    <span class="nav-step">Preview</span>
-  </div>
-</nav>
-
-<div class="page-wrap">
-  <div class="editor-layout">
-
-    <!-- Left sidebar -->
-    <div class="editor-sidebar">
-      <div class="editor-sidebar-badge">Step 2 of 3</div>
-      <h1 class="editor-sidebar-title">Build Your Portfolio</h1>
-      <p class="editor-sidebar-desc">
-        Fill in your details below. The more you share, the more impressive your portfolio
-        will look to potential employers and collaborators.
-      </p>
-
-      <div class="template-indicator">
-        <div>
-          <div class="ti-label">Current Template</div>
-          <div class="ti-name" id="templateIndicatorName">Loading...</div>
-        </div>
-        <a href="templates.html" class="ti-change">Change</a>
+    <nav>
+      <a href="index.html" class="nav-logo">Folio<span>.</span></a>
+      <div class="nav-steps">
+        <a href="templates.html" class="nav-step done">Template</a>
+        <span class="nav-step-sep">›</span>
+        <span class="nav-step current">Details</span>
+        <span class="nav-step-sep">›</span>
+        <span class="nav-step">Preview</span>
       </div>
+    </nav>
 
-      <ul class="tips-list">
-        <li><span class="tip-num">1</span> Use specific, measurable descriptions for your projects to stand out.</li>
-        <li><span class="tip-num">2</span> Add 5–10 skills for a well-rounded profile.</li>
-        <li><span class="tip-num">3</span> A concise About section (2–3 sentences) is more effective than a long one.</li>
-        <li><span class="tip-num">4</span> Include a GitHub link in your contact details for tech roles.</li>
-      </ul>
-    </div>
+    <div class="page-wrap">
+      <div class="editor-layout">
+        <!-- Left sidebar -->
+        <div class="editor-sidebar">
+          <div class="editor-sidebar-badge">Step 2 of 3</div>
+          <h1 class="editor-sidebar-title">Build Your Portfolio</h1>
+          <p class="editor-sidebar-desc">
+            Fill in your details below. The more you share, the more impressive
+            your portfolio will look to potential employers and collaborators.
+          </p>
 
-    <!-- Form card -->
-    <div class="editor-form-card">
-
-      <div class="progress-bar-wrap">
-        <div class="progress-bar-fill" id="progressBar" style="width:0%"></div>
-      </div>
-
-      <form id="portfolioForm" novalidate>
-
-        <!-- Section 1: Identity -->
-        <div class="form-section">
-          <div class="form-section-header">
-            <div class="fsh-num">01</div>
-            <span class="fsh-title">Identity</span>
-            <span class="fsh-subtitle">Who are you?</span>
+          <div class="template-indicator">
+            <div>
+              <div class="ti-label">Current Template</div>
+              <div class="ti-name" id="templateIndicatorName">Loading...</div>
+            </div>
+            <a href="templates.html" class="ti-change">Change</a>
           </div>
 
-          <!-- Avatar upload -->
-          <div class="avatar-upload">
-            <div class="avatar-preview" id="avatarPreview">
-              <img id="avatarImg" src="" alt="Profile" />
-              <div class="avatar-placeholder">
-                <div style="width:30px;height:30px;border-radius:50%;background:rgba(59,130,246,0.15);border:1px solid rgba(59,130,246,0.25);margin:0 auto 4px"></div>
-                <div class="avatar-placeholder-text">PHOTO</div>
+          <ul class="tips-list">
+            <li>
+              <span class="tip-num">1</span> Use specific, measurable
+              descriptions for your projects to stand out.
+            </li>
+            <li>
+              <span class="tip-num">2</span> Add 5–10 skills for a well-rounded
+              profile.
+            </li>
+            <li>
+              <span class="tip-num">3</span> A concise About section (2–3
+              sentences) is more effective than a long one.
+            </li>
+            <li>
+              <span class="tip-num">4</span> Include a GitHub link in your
+              contact details for tech roles.
+            </li>
+          </ul>
+        </div>
+
+        <!-- Form card -->
+        <div class="editor-form-card">
+          <div class="progress-bar-wrap">
+            <div
+              class="progress-bar-fill"
+              id="progressBar"
+              style="width: 0%"
+            ></div>
+          </div>
+
+          <form id="portfolioForm" novalidate>
+            <!-- Section 1: Identity -->
+            <div class="form-section">
+              <div class="form-section-header">
+                <div class="fsh-num">01</div>
+                <span class="fsh-title">Identity</span>
+                <span class="fsh-subtitle">Who are you?</span>
+              </div>
+
+              <!-- Avatar upload -->
+              <div class="avatar-upload">
+                <div class="avatar-preview" id="avatarPreview">
+                  <img id="avatarImg" src="" alt="Profile" />
+                  <div class="avatar-placeholder">
+                    <div
+                      style="
+                        width: 30px;
+                        height: 30px;
+                        border-radius: 50%;
+                        background: rgba(59, 130, 246, 0.15);
+                        border: 1px solid rgba(59, 130, 246, 0.25);
+                        margin: 0 auto 4px;
+                      "
+                    ></div>
+                    <div class="avatar-placeholder-text">PHOTO</div>
+                  </div>
+                </div>
+                <div class="avatar-upload-info">
+                  <div class="avatar-upload-label">Profile Photo</div>
+                  <div class="avatar-upload-hint">
+                    JPG or PNG, max 2MB. Optional but recommended.
+                  </div>
+                  <label class="btn-upload" style="display: inline-block">
+                    Choose Photo
+                    <input
+                      type="file"
+                      accept="image/*"
+                      id="avatarInput"
+                      onchange="handleAvatarUpload(this)"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="name">Full Name *</label>
+                  <input
+                    type="text"
+                    id="name"
+                    placeholder="Alex Mercer"
+                    required
+                    oninput="updateProgress()"
+                  />
+                </div>
+                <div class="field-group">
+                  <label for="role">Role / Degree</label>
+                  <input
+                    type="text"
+                    id="role"
+                    placeholder="Computer Science Student"
+                    oninput="updateProgress()"
+                  />
+                </div>
               </div>
             </div>
-            <div class="avatar-upload-info">
-              <div class="avatar-upload-label">Profile Photo</div>
-              <div class="avatar-upload-hint">JPG or PNG, max 2MB. Optional but recommended.</div>
-              <label class="btn-upload" style="display:inline-block">
-                Choose Photo
-                <input type="file" accept="image/*" id="avatarInput" onchange="handleAvatarUpload(this)" />
-              </label>
+
+            <!-- Section 2: About -->
+            <div class="form-section">
+              <div class="form-section-header">
+                <div class="fsh-num">02</div>
+                <span class="fsh-title">About Me</span>
+                <span class="fsh-subtitle">Your story</span>
+              </div>
+
+              <div class="field-group">
+                <label for="about">About Me *</label>
+                <textarea
+                  id="about"
+                  placeholder="I am a final-year Computer Science student passionate about building scalable web applications. I enjoy solving complex problems and collaborating in fast-paced environments."
+                  required
+                  oninput="updateProgress()"
+                ></textarea>
+                <div class="field-hint">Aim for 2–4 concise sentences.</div>
+              </div>
             </div>
-          </div>
 
-          <div class="field-row">
-            <div class="field-group">
-              <label for="name">Full Name *</label>
-              <input type="text" id="name" placeholder="Alex Mercer" required oninput="updateProgress()" />
+            <!-- Section 3: Skills -->
+            <div class="form-section">
+              <div class="form-section-header">
+                <div class="fsh-num">03</div>
+                <span class="fsh-title">Skills</span>
+                <span class="fsh-subtitle">Your expertise</span>
+              </div>
+
+              <div class="field-group">
+                <label>Skills (press Enter or comma to add)</label>
+                <div
+                  class="tags-input-wrap"
+                  id="tagsWrap"
+                  onclick="document.getElementById('skillInput').focus()"
+                >
+                  <input
+                    class="tags-text-input"
+                    id="skillInput"
+                    placeholder="Type a skill and press Enter..."
+                  />
+                </div>
+                <div class="field-hint">
+                  e.g. JavaScript, React, Python, Machine Learning
+                </div>
+              </div>
             </div>
-            <div class="field-group">
-              <label for="role">Role / Degree</label>
-              <input type="text" id="role" placeholder="Computer Science Student" oninput="updateProgress()" />
+
+            <!-- Section 4: Projects -->
+            <div class="form-section">
+              <div class="form-section-header">
+                <div class="fsh-num">04</div>
+                <span class="fsh-title">Projects</span>
+                <span class="fsh-subtitle">What you've built</span>
+              </div>
+
+              <div class="field-group">
+                <label for="projects">Projects</label>
+                <textarea
+                  id="projects"
+                  placeholder="E-Commerce Platform — React, Node.js, MongoDB. A full-stack shopping app with authentication and payment integration.
+
+ML Dashboard — Python, TensorFlow, Flask. An analytics tool for visualizing machine learning model performance."
+                  oninput="updateProgress()"
+                ></textarea>
+                <div class="field-hint">
+                  Separate each project with a blank line for best results.
+                </div>
+              </div>
             </div>
-          </div>
-        </div>
 
-        <!-- Section 2: About -->
-        <div class="form-section">
-          <div class="form-section-header">
-            <div class="fsh-num">02</div>
-            <span class="fsh-title">About Me</span>
-            <span class="fsh-subtitle">Your story</span>
-          </div>
+            <!-- Section 5: Certifications -->
+            <div class="form-section">
+              <div class="form-section-header">
+                <div class="fsh-num">05</div>
+                <span class="fsh-title">Certifications</span>
+                <span class="fsh-subtitle">Your credentials</span>
+              </div>
 
-          <div class="field-group">
-            <label for="about">About Me *</label>
-            <textarea id="about" placeholder="I am a final-year Computer Science student passionate about building scalable web applications. I enjoy solving complex problems and collaborating in fast-paced environments." required oninput="updateProgress()"></textarea>
-            <div class="field-hint">Aim for 2–4 concise sentences.</div>
-          </div>
-        </div>
-
-        <!-- Section 3: Skills -->
-        <div class="form-section">
-          <div class="form-section-header">
-            <div class="fsh-num">03</div>
-            <span class="fsh-title">Skills</span>
-            <span class="fsh-subtitle">Your expertise</span>
-          </div>
-
-          <div class="field-group">
-            <label>Skills (press Enter or comma to add)</label>
-            <div class="tags-input-wrap" id="tagsWrap" onclick="document.getElementById('skillInput').focus()">
-              <input class="tags-text-input" id="skillInput" placeholder="Type a skill and press Enter..." />
-            </div>
-            <div class="field-hint">e.g. JavaScript, React, Python, Machine Learning</div>
-          </div>
-        </div>
-
-        <!-- Section 4: Projects -->
-        <div class="form-section">
-          <div class="form-section-header">
-            <div class="fsh-num">04</div>
-            <span class="fsh-title">Projects</span>
-            <span class="fsh-subtitle">What you've built</span>
-          </div>
-
-          <div class="field-group">
-            <label for="projects">Projects</label>
-            <textarea id="projects" placeholder="E-Commerce Platform — React, Node.js, MongoDB. A full-stack shopping app with authentication and payment integration.
-
-ML Dashboard — Python, TensorFlow, Flask. An analytics tool for visualizing machine learning model performance." oninput="updateProgress()"></textarea>
-            <div class="field-hint">Separate each project with a blank line for best results.</div>
-          </div>
-        </div>
-
-        <!-- Section 5: Certifications -->
-        <div class="form-section">
-          <div class="form-section-header">
-            <div class="fsh-num">05</div>
-            <span class="fsh-title">Certifications</span>
-            <span class="fsh-subtitle">Your credentials</span>
-          </div>
-
-          <div class="field-group">
-            <label for="certifications">Certifications</label>
-            <textarea id="certifications" placeholder="AWS Cloud Practitioner — Amazon Web Services, 2024
+              <div class="field-group">
+                <label for="certifications">Certifications</label>
+                <textarea
+                  id="certifications"
+                  placeholder="AWS Cloud Practitioner — Amazon Web Services, 2024
 Google Data Analytics Professional Certificate — Coursera, 2023
-React Developer Certification — Meta, 2023" style="min-height:80px;" oninput="updateProgress()"></textarea>
-            <div class="field-hint">One per line: Name — Issuer, Year</div>
-          </div>
+React Developer Certification — Meta, 2023"
+                  style="min-height: 80px"
+                  oninput="updateProgress()"
+                ></textarea>
+                <div class="field-hint">One per line: Name — Issuer, Year</div>
+              </div>
+            </div>
+
+            <!-- Section 6: Contact -->
+            <div class="form-section">
+              <div class="form-section-header">
+                <div class="fsh-num">06</div>
+                <span class="fsh-title">Contact</span>
+                <span class="fsh-subtitle">How to reach you</span>
+              </div>
+
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="email">Email</label>
+                  <input
+                    type="email"
+                    id="email"
+                    placeholder="alex@email.com"
+                    oninput="updateProgress()"
+                  />
+                </div>
+                <div class="field-group">
+                  <label for="phone">Phone</label>
+                  <input
+                    type="text"
+                    id="phone"
+                    placeholder="+1 (555) 000-0000"
+                    oninput="updateProgress()"
+                  />
+                </div>
+              </div>
+              <div class="field-row">
+                <div class="field-group">
+                  <label for="github">GitHub</label>
+                  <input
+                    type="url"
+                    id="github"
+                    placeholder="github.com/username"
+                    oninput="updateProgress()"
+                  />
+                </div>
+                <div class="field-group">
+                  <label for="linkedin">LinkedIn</label>
+                  <input
+                    type="url"
+                    id="linkedin"
+                    placeholder="linkedin.com/in/username"
+                    oninput="updateProgress()"
+                  />
+                </div>
+              </div>
+              <div class="field-group">
+                <label for="website">Personal Website</label>
+                <input
+                  type="url"
+                  id="website"
+                  placeholder="yourwebsite.com"
+                  oninput="updateProgress()"
+                />
+              </div>
+            </div>
+
+            <!-- Actions -->
+            <div class="form-actions">
+              <button
+                type="button"
+                class="btn-save-draft"
+                onclick="saveDraft()"
+              >
+                Save Draft
+              </button>
+              <button
+                type="button"
+                class="btn-preview"
+                onclick="previewPortfolio()"
+              >
+                Preview My Portfolio
+              </button>
+            </div>
+          </form>
         </div>
-
-        <!-- Section 6: Contact -->
-        <div class="form-section">
-          <div class="form-section-header">
-            <div class="fsh-num">06</div>
-            <span class="fsh-title">Contact</span>
-            <span class="fsh-subtitle">How to reach you</span>
-          </div>
-
-          <div class="field-row">
-            <div class="field-group">
-              <label for="email">Email</label>
-              <input type="email" id="email" placeholder="alex@email.com" oninput="updateProgress()" />
-            </div>
-            <div class="field-group">
-              <label for="phone">Phone</label>
-              <input type="text" id="phone" placeholder="+1 (555) 000-0000" oninput="updateProgress()" />
-            </div>
-          </div>
-          <div class="field-row">
-            <div class="field-group">
-              <label for="github">GitHub</label>
-              <input type="url" id="github" placeholder="github.com/username" oninput="updateProgress()" />
-            </div>
-            <div class="field-group">
-              <label for="linkedin">LinkedIn</label>
-              <input type="url" id="linkedin" placeholder="linkedin.com/in/username" oninput="updateProgress()" />
-            </div>
-          </div>
-          <div class="field-group">
-            <label for="website">Personal Website</label>
-            <input type="url" id="website" placeholder="yourwebsite.com" oninput="updateProgress()" />
-          </div>
-        </div>
-
-        <!-- Actions -->
-        <div class="form-actions">
-          <button type="button" class="btn-save-draft" onclick="saveDraft()">Save Draft</button>
-          <button type="button" class="btn-preview" onclick="previewPortfolio()">Preview My Portfolio</button>
-        </div>
-
-      </form>
+      </div>
     </div>
 
-  </div>
-</div>
+    <!-- Toast -->
+    <div class="toast" id="toast">
+      <div class="toast-title" id="toastTitle"></div>
+      <div class="toast-sub" id="toastSub"></div>
+    </div>
 
-<!-- Toast -->
-<div class="toast" id="toast">
-  <div class="toast-title" id="toastTitle"></div>
-  <div class="toast-sub" id="toastSub"></div>
-</div>
+    <script>
+      /* ── Skills tags ── */
+      const skills = [];
 
-<script>
-  /* ── Skills tags ── */
-  const skills = [];
-
-  function addSkill(val) {
-    const v = val.trim().replace(/,$/, '');
-    if (!v || skills.includes(v)) return;
-    skills.push(v);
-    renderTags();
-    updateProgress();
-  }
-
-  function removeSkill(idx) {
-    skills.splice(idx, 1);
-    renderTags();
-    updateProgress();
-  }
-
-  function renderTags() {
-    const wrap = document.getElementById('tagsWrap');
-    const input = document.getElementById('skillInput');
-    // Clear existing chips
-    wrap.querySelectorAll('.tag-chip').forEach(c => c.remove());
-    // Re-render
-    skills.forEach((s, i) => {
-      const chip = document.createElement('div');
-      chip.className = 'tag-chip';
-      chip.innerHTML = `${s}<button class="tag-chip-remove" onclick="removeSkill(${i})" type="button">×</button>`;
-      wrap.insertBefore(chip, input);
-    });
-  }
-
-  document.getElementById('skillInput').addEventListener('keydown', function(e) {
-    if (e.key === 'Enter' || e.key === ',') {
-      e.preventDefault();
-      addSkill(this.value);
-      this.value = '';
-    }
-    if (e.key === 'Backspace' && this.value === '' && skills.length) {
-      removeSkill(skills.length - 1);
-    }
-  });
-
-  document.getElementById('skillInput').addEventListener('blur', function() {
-    if (this.value.trim()) {
-      addSkill(this.value);
-      this.value = '';
-    }
-  });
-
-  /* ── Avatar upload ── */
-  function handleAvatarUpload(input) {
-    const file = input.files[0];
-    if (!file) return;
-    const reader = new FileReader();
-    reader.onload = (e) => {
-      const img = document.getElementById('avatarImg');
-      img.src = e.target.result;
-      img.style.display = 'block';
-      document.querySelector('.avatar-placeholder').style.display = 'none';
-      localStorage.setItem('folioAvatar', e.target.result);
-    };
-    reader.readAsDataURL(file);
-  }
-
-  /* ── Progress ── */
-  const progressFields = ['name', 'about', 'role', 'projects', 'certifications', 'email', 'github', 'linkedin'];
-
-  function updateProgress() {
-    let filled = 0;
-    progressFields.forEach(id => {
-      const el = document.getElementById(id);
-      if (el && el.value.trim()) filled++;
-    });
-    if (skills.length > 0) filled++;
-    const pct = Math.round((filled / (progressFields.length + 1)) * 100);
-    document.getElementById('progressBar').style.width = pct + '%';
-  }
-
-  /* ── Template indicator ── */
-  const templateNames = {
-    minimal: 'Minimal Template',
-    sidebar: 'Sidebar Template',
-    bold: 'Bold Template',
-    timeline: 'Timeline Template'
-  };
-  const saved = localStorage.getItem('folioTemplate');
-  document.getElementById('templateIndicatorName').textContent = templateNames[saved] || 'No Template Selected';
-
-  /* ── Restore draft ── */
-  function restoreDraft() {
-    const draft = localStorage.getItem('folioDraft');
-    if (!draft) return;
-    try {
-      const data = JSON.parse(draft);
-      const fields = ['name','role','about','projects','certifications','email','phone','github','linkedin','website'];
-      fields.forEach(f => { if (data[f]) document.getElementById(f).value = data[f]; });
-      if (data.skills) {
-        data.skills.forEach(s => { if (!skills.includes(s)) skills.push(s); });
+      function addSkill(val) {
+        const v = val.trim().replace(/,$/, "");
+        if (!v || skills.includes(v)) return;
+        skills.push(v);
         renderTags();
+        updateProgress();
       }
-      if (data.avatar) {
-        const img = document.getElementById('avatarImg');
-        img.src = data.avatar;
-        img.style.display = 'block';
-        document.querySelector('.avatar-placeholder').style.display = 'none';
+
+      function removeSkill(idx) {
+        skills.splice(idx, 1);
+        renderTags();
+        updateProgress();
       }
-      updateProgress();
-    } catch(e) {}
-  }
-  restoreDraft();
 
-  /* ── Gather data ── */
-  function gatherData() {
-    return {
-      name: document.getElementById('name').value.trim(),
-      role: document.getElementById('role').value.trim(),
-      about: document.getElementById('about').value.trim(),
-      skills: [...skills],
-      projects: document.getElementById('projects').value.trim(),
-      certifications: document.getElementById('certifications').value.trim(),
-      email: document.getElementById('email').value.trim(),
-      phone: document.getElementById('phone').value.trim(),
-      github: document.getElementById('github').value.trim(),
-      linkedin: document.getElementById('linkedin').value.trim(),
-      website: document.getElementById('website').value.trim(),
-      avatar: localStorage.getItem('folioAvatar') || ''
-    };
-  }
+      function renderTags() {
+        const wrap = document.getElementById("tagsWrap");
+        const input = document.getElementById("skillInput");
+        // Clear existing chips
+        wrap.querySelectorAll(".tag-chip").forEach((c) => c.remove());
+        // Re-render
+        skills.forEach((s, i) => {
+          const chip = document.createElement("div");
+          chip.className = "tag-chip";
+          chip.innerHTML = `${s}<button class="tag-chip-remove" onclick="removeSkill(${i})" type="button">×</button>`;
+          wrap.insertBefore(chip, input);
+        });
+      }
 
-  /* ── Save draft ── */
-  function saveDraft() {
-    const data = gatherData();
-    localStorage.setItem('folioDraft', JSON.stringify(data));
-    showToast('Draft Saved', 'Your progress has been saved locally.');
-  }
+      document
+        .getElementById("skillInput")
+        .addEventListener("keydown", function (e) {
+          if (e.key === "Enter" || e.key === ",") {
+            e.preventDefault();
+            addSkill(this.value);
+            this.value = "";
+          }
+          if (e.key === "Backspace" && this.value === "" && skills.length) {
+            removeSkill(skills.length - 1);
+          }
+        });
 
-  /* ── Preview ── */
-  function previewPortfolio() {
-    const data = gatherData();
-    if (!data.name) {
-      showToast('Name Required', 'Please enter your full name before previewing.', true);
-      document.getElementById('name').focus();
-      return;
-    }
-    localStorage.setItem('folioDraft', JSON.stringify(data));
-    localStorage.setItem('folioData', JSON.stringify(data));
-    window.location.href = 'preview.html';
-  }
+      document
+        .getElementById("skillInput")
+        .addEventListener("blur", function () {
+          if (this.value.trim()) {
+            addSkill(this.value);
+            this.value = "";
+          }
+        });
 
-  /* ── Toast ── */
-  function showToast(title, sub, isError = false) {
-    const toast = document.getElementById('toast');
-    document.getElementById('toastTitle').textContent = title;
-    document.getElementById('toastSub').textContent = sub;
-    toast.style.borderColor = isError ? 'rgba(239,68,68,0.4)' : 'rgba(59,130,246,0.3)';
-    toast.classList.add('show');
-    setTimeout(() => toast.classList.remove('show'), 3000);
-  }
+      /* ── Avatar upload ── */
+      function handleAvatarUpload(input) {
+        const file = input.files[0];
+        if (!file) return;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+          const img = document.getElementById("avatarImg");
+          img.src = e.target.result;
+          img.style.display = "block";
+          document.querySelector(".avatar-placeholder").style.display = "none";
+          localStorage.setItem("folioAvatar", e.target.result);
+        };
+        reader.readAsDataURL(file);
+      }
 
-  /* Auto-save every 30s */
-  setInterval(() => {
-    const data = gatherData();
-    if (data.name || data.about) localStorage.setItem('folioDraft', JSON.stringify(data));
-  }, 30000);
-</script>
-</body>
+      /* ── Progress ── */
+      const progressFields = [
+        "name",
+        "about",
+        "role",
+        "projects",
+        "certifications",
+        "email",
+        "github",
+        "linkedin",
+      ];
+
+      function updateProgress() {
+        let filled = 0;
+        progressFields.forEach((id) => {
+          const el = document.getElementById(id);
+          if (el && el.value.trim()) filled++;
+        });
+        if (skills.length > 0) filled++;
+        const pct = Math.round((filled / (progressFields.length + 1)) * 100);
+        document.getElementById("progressBar").style.width = pct + "%";
+      }
+
+      /* ── Template indicator ── */
+      const templateNames = {
+        minimal: "Minimal Template",
+        sidebar: "Sidebar Template",
+        bold: "Bold Template",
+        timeline: "Timeline Template",
+      };
+      const saved = localStorage.getItem("folioTemplate");
+      document.getElementById("templateIndicatorName").textContent =
+        templateNames[saved] || "No Template Selected";
+
+      /* ── Restore draft ── */
+      function restoreDraft() {
+        const draft = localStorage.getItem("folioDraft");
+        if (!draft) return;
+        try {
+          const data = JSON.parse(draft);
+          const fields = [
+            "name",
+            "role",
+            "about",
+            "projects",
+            "certifications",
+            "email",
+            "phone",
+            "github",
+            "linkedin",
+            "website",
+          ];
+          fields.forEach((f) => {
+            if (data[f]) document.getElementById(f).value = data[f];
+          });
+          if (data.skills) {
+            data.skills.forEach((s) => {
+              if (!skills.includes(s)) skills.push(s);
+            });
+            renderTags();
+          }
+          if (data.avatar) {
+            const img = document.getElementById("avatarImg");
+            img.src = data.avatar;
+            img.style.display = "block";
+            document.querySelector(".avatar-placeholder").style.display =
+              "none";
+          }
+          updateProgress();
+        } catch (e) {}
+      }
+      restoreDraft();
+
+      /* ── Gather data ── */
+      function gatherData() {
+        return {
+          name: document.getElementById("name").value.trim(),
+          role: document.getElementById("role").value.trim(),
+          about: document.getElementById("about").value.trim(),
+          skills: [...skills],
+          projects: document.getElementById("projects").value.trim(),
+          certifications: document
+            .getElementById("certifications")
+            .value.trim(),
+          email: document.getElementById("email").value.trim(),
+          phone: document.getElementById("phone").value.trim(),
+          github: document.getElementById("github").value.trim(),
+          linkedin: document.getElementById("linkedin").value.trim(),
+          website: document.getElementById("website").value.trim(),
+          avatar: localStorage.getItem("folioAvatar") || "",
+        };
+      }
+
+      /* ── Save draft ── */
+      function saveDraft() {
+        const data = gatherData();
+        localStorage.setItem("folioDraft", JSON.stringify(data));
+        showToast("Draft Saved", "Your progress has been saved locally.");
+      }
+
+      /* ── Preview ── */
+      function previewPortfolio() {
+        const data = gatherData();
+        if (!data.name) {
+          showToast(
+            "Name Required",
+            "Please enter your full name before previewing.",
+            true,
+          );
+          document.getElementById("name").focus();
+          return;
+        }
+        localStorage.setItem("folioDraft", JSON.stringify(data));
+        localStorage.setItem("folioData", JSON.stringify(data));
+        window.location.href = "preview.html";
+      }
+
+      /* ── Toast ── */
+      function showToast(title, sub, isError = false) {
+        const toast = document.getElementById("toast");
+        document.getElementById("toastTitle").textContent = title;
+        document.getElementById("toastSub").textContent = sub;
+        toast.style.borderColor = isError
+          ? "rgba(239,68,68,0.4)"
+          : "rgba(59,130,246,0.3)";
+        toast.classList.add("show");
+        setTimeout(() => toast.classList.remove("show"), 3000);
+      }
+
+      /* Auto-save every 30s */
+      setInterval(() => {
+        const data = gatherData();
+        if (data.name || data.about)
+          localStorage.setItem("folioDraft", JSON.stringify(data));
+      }, 30000);
+    </script>
+  </body>
 </html>
